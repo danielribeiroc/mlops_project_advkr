@@ -4,8 +4,7 @@ from datetime import datetime
 def process_message(message: Message):
     if not message.timestamp:
         message.timestamp = datetime.utcnow()
-
-    print("Processing message:", message.text)
+        
     if "hello" in message.text.lower():
         return {"sender": "bot", "text": "Hello! How can I assist you today?", "timestamp": datetime.utcnow()}
     elif "bye" in message.text.lower():
