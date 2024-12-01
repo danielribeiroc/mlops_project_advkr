@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: frontend-image:latest # Image Docker du frontend
+        image: frontend-image:latest # TODO replace with repo address
         ports:
         - containerPort: 3000
 

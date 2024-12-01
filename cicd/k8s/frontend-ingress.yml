@@ -5,7 +5,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: ${HOST}
+    - host: ${HOST} # TODO replace with HOST address or find a way to do it properly
       http:
         paths:
           - path: /
@@ -17,5 +17,5 @@ spec:
                   name: http
   tls:
     - hosts:
-        - ${HOST}
+        - ${HOST} # TODO replace with HOST address or find a way to do it properly
 
