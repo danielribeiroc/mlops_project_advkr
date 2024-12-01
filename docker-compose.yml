@@ -3,10 +3,10 @@ version: '3.8'
 services:
   backend:
     build:
-      context: ./backend  # Path to your backend Dockerfile
+      context: ./backend
     container_name: backend
     ports:
-      - "8080:8080"  # Expose backend on port 8080
+      - "8080:8080"
     networks:
       - mlops-network
     environment:
@@ -14,14 +14,14 @@ services:
 
   frontend:
     build:
-      context: ./frontend_mlops  # Path to your frontend Dockerfile
+      context: ./frontend_mlops
     container_name: frontend
     ports:
-      - "3000:3000"  # Expose frontend on port 3000
+      - "3000:3000"
     networks:
       - mlops-network
     depends_on:
-      - backend  # Ensure the backend is up before frontend
+      - backend
 
 networks:
   mlops-network:
