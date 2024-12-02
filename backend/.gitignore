@@ -107,3 +107,4 @@ dist
 
 # Windows files
 Thumbs.db
+/datasets
