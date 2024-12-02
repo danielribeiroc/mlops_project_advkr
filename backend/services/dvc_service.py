@@ -34,7 +34,7 @@ class DVCService:
             self.repo.scm.add(["."])
             self.repo.scm.commit("Add training data via API")
 
-            self.repo.push()
+            #self.repo.push()
             self.repo.scm.push()
             print("Files and metadata pushed to remote storage.")
         except Exception as e:
