@@ -35,7 +35,7 @@ class DVCService:
             self.repo.scm.commit("Add training data via API")
 
             #self.repo.push()
-            self.repo.scm.push()
+            #self.repo.scm.push()
             print("Files and metadata pushed to remote storage.")
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error during DVC/Git operation: {str(e)}")
