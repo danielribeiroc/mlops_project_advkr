@@ -10,7 +10,9 @@ async def train_model(files: List[UploadFile] = File(...)):
     print("Received files for training.")
     # Save files and track with DVC
     try:
+        print("Saving files...")
         saved_files = dvc_service.save_files(files)  # Save files locally
+        print("Tracking files with DVC...")
         dvc_service.track_with_dvc(saved_files)  # Track with DVC and push
     except HTTPException as e:
         raise e
