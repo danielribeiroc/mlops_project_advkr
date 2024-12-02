@@ -26,17 +26,16 @@ class DVCService:
     def track_with_dvc(self, files: List[str]):
         """Track the saved files with DVC and push to remote."""
         try:
+            print("Testing DVC")
             for file_path in files:
-                self.repo.add(file_path)  # Track file with DVC
+                self.repo.add(file_path)
                 print(f"Tracked {file_path} with DVC.")
 
-            # Commit changes to Git
-            self.repo.scm.add(["."])  # Stage changes
-            self.repo.scm.commit("Add training data via API")  # Commit changes
+            self.repo.scm.add(["."])
+            self.repo.scm.commit("Add training data via API")
 
-            # Push data to DVC remote and Git remote
-            self.repo.push()  # Push data files
-            self.repo.scm.push()  # Push metadata to Git remote
+            self.repo.push()
+            self.repo.scm.push()
             print("Files and metadata pushed to remote storage.")
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error during DVC/Git operation: {str(e)}")
