@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, File, UploadFile
 from models.message import Message
+from typing import List
 from services.message_service import process_message
 
 router = APIRouter()
@@ -14,4 +15,3 @@ async def send_message(message: Message):
 @router.get("/test")
 async def test_endpoint():
     return {"message": "All working fine!"}
-

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import chat
+from routers import chat, train_model
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -18,3 +18,4 @@ app.add_middleware(
 )
 
 app.include_router(chat.router, prefix="/api/v1")
+app.include_router(train_model.router, prefix="/api/v1")
