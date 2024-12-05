@@ -1,6 +1,6 @@
 # Token huggingface
 lora/hf_token.yaml
-
+fine_tuned_lora_llama/
 ### JupyterNotebooks ###
 # gitignore template for Jupyter Notebooks
 # website: http://jupyter.org/
