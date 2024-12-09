@@ -74,8 +74,7 @@ python client.py
   ```json
   {
       "prompt": "Who is Alex Mozerski?",
-      "max_length": 100,
-      "temperature": 0.9
+      "max_length": 100
   }
   ```
 

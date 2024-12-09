@@ -1,39 +1,30 @@
 # ==============================================================================
-# BentoML Configuration File
-# ==============================================================================
+# BentoML Configuration
 #
-# This configuration defines the BentoML service for generating text using a
-# fine-tuned LLaMA language model. It specifies the service details, included
-# files, required Python packages, and Docker settings for deployment.
+# Defines a BentoML service for text generation using a fine-tuned LLaMA model.
 #
 # Requirements:
-# - Install BentoML: `pip install bentoml`
+# - pip install bentoml
 #
-# Module : MLOps
-# Authors: alex.mozerski, daniel.ribeirocabral, victor.rominger, 
+# Authors: alex.mozerski, daniel.ribeirocabral, victor.rominger,
 #          killian.ruffieux, ruben.terceiro
-# Date: 05.12.2024
+# Date: 16.12.2024
 # ==============================================================================
-service: "service:svc"  # Specifies the BentoML service to deploy. 
-                       # "svc" should match the service name defined in your Python code.
 
-description: "Service for generating text using a fine-tuned LLaMA model."
+service: "service:svc"         # Name of the BentoML service to deploy.
+description: "Generates text using a fine-tuned LLaMA model."
 
 include:
-  - "*.py"                           # Includes all Python files in the current directory.
-  - "bentofile.yaml"                 # Includes the BentoML configuration file itself.
-  - "fine_tuned_lora_llama/**"       # Includes all files and subdirectories within the 
-                                     # 'fine_tuned_lora_llama' directory, typically containing 
-                                     # the fine-tuned model and tokenizer.
+  - "*.py"                      # Include all Python files in this directory.
+  - "bentofile.yaml"            # Include this config file.
+  - "fine_tuned_lora_llama/**"  # Include the fine-tuned model and tokenizer files.
 
 python:
   packages:
-    - torch                          # PyTorch library for tensor computations and model handling.
-    - transformers                   # Hugging Face Transformers library for model and tokenizer utilities.
-    - bentoml                        # BentoML framework for model serving and deployment.
-    - requests                       # HTTP library for making API requests.
+    - torch
+    - transformers
+    - bentoml
+    - requests
 
 docker:
-  base_image: "bentoml/model-server:latest"  # Specifies the base Docker image to use for deployment.
-                                            # Uses the latest BentoML model server image, which is optimized 
-                                            # for serving BentoML services.
+  base_image: "bentoml/model-server:latest"  # Use BentoML's model-server image.

@@ -1,48 +1,46 @@
 """
-Generating Text Using the Deployed LLaMA Model API
-==================================================
+Generate Text from a Deployed LLaMA Model API
+============================================
 
-This script sends a request to the deployed LLaMA language model API to generate text based
-on a provided prompt. It constructs the necessary JSON payload with parameters for text
-generation, handles the API response, and manages potential request errors.
+This script sends a text prompt to a deployed LLaMA language model API and prints 
+the generated response. Parameters like temperature, top_k, and top_p have been 
+removed for simplicity, relying on default generation settings defined by the model.
 
 Requirements:
-- Install the necessary package: requests
+- pip install requests
 
-Module : MLOps
 Authors: alex.mozerski, daniel.ribeirocabral, victor.rominger, killian.ruffieux, ruben.terceiro
-Date: 05.12.2024
-===================================================
+Date: 16.12.2024
+============================================
 """
 
 import requests
 
-# Define the API endpoint URL and headers
+# The URL of the deployed LLaMA model API endpoint
 url = "http://0.0.0.0:3002/generate"
+
+# Headers indicating that we'll send and receive JSON data
 headers = {"Content-Type": "application/json"}
 
-# Prepare the data payload with prompt and generation parameters
+# JSON payload that includes the prompt and max_length for text generation
 data = {
     "prompt": "<|startoftext|>[INST] Who is Alex Mozerski? [/INST]",
-    "max_length": 100,     # Maximum length of the generated text
-    "temperature": 0.9,    # Sampling temperature for controlling randomness
-    "top_k": 50,           # Top-k sampling parameter for selecting likely tokens
-    "top_p": 0.9,          # Nucleus sampling parameter for cumulative probability
+    "max_length": 50   # How long the generated response can be, in tokens
 }
 
 try:
-    # Send a POST request to the API with the JSON payload
+    # Send the request to the API
     response = requests.post(url, json=data, headers=headers)
-    response.raise_for_status()  # Raise an exception for HTTP error responses
-    
-    # Extract and print the generated text from the API response
+    response.raise_for_status()  # Check for HTTP errors
+
+    # Extract the generated text from the response JSON
     generated_text = response.json().get("generated_text")
     print("Generated Text:", generated_text)
-    
+
 except requests.exceptions.RequestException as e:
-    # Handle any request-related errors (e.g., network issues, invalid responses)
+    # Handles network issues or invalid HTTP responses
     print(f"Request failed: {e}")
-    
+
 except Exception as e:
-    # Handle any other unforeseen errors
+    # Handles any unexpected errors
     print(f"Error: {e}")
