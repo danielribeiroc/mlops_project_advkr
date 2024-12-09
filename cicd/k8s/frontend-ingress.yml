@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-frontend
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: ${HOST} # TODO replace with HOST address or find a way to do it properly
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: service-frontend
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - ${HOST} # TODO replace with HOST address or find a way to do it properly
+

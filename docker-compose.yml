@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: backend
+    ports:
+      - "8080:8080"
+    networks:
+      - mlops-network
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  frontend:
+    build:
+      context: ./frontend_mlops
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - mlops-network
+    depends_on:
+      - backend
+
+networks:
+  mlops-network:
+    driver: bridge
