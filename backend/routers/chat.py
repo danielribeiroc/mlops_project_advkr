@@ -7,11 +7,13 @@ router = APIRouter()
 
 @router.post("/messages")
 async def send_message(message: Message):
-    response = process_message(message)
+    from main import pipeline_rag
+
+    response = process_message(message, pipeline_rag)
     if not response:
         raise HTTPException(status_code=500, detail="Error processing message")
     return response
 
 @router.get("/test")
 async def test_endpoint():
-    return {"message": "All working fine!"}
+    return {"message": "All working fine! v1"}

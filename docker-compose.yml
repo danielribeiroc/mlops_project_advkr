@@ -1,12 +1,12 @@
 version: '3.8'
 
 services:
-  backend:
+  backend-service:
     build:
       context: ./backend
     container_name: backend
     ports:
-      - "8080:8080"
+      - "8000:8000"
     networks:
       - mlops-network
     environment:
@@ -21,7 +21,18 @@ services:
     networks:
       - mlops-network
     depends_on:
-      - backend
+      - backend-service
+
+  bentoml-service:
+    build:
+      context: ./lora  # Replace with the correct path
+    container_name: bentoml-service
+    ports:
+      - "3002:3002"  # Port where Bentoml will be accessible
+    networks:
+      - mlops-network
+    environment:
+      - PYTHONUNBUFFERED=1
 
 networks:
   mlops-network:
