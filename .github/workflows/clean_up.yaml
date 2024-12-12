@@ -1,0 +1,32 @@
+name: Cleanup GKE Resources
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ secrets.GCP_K8S_CLUSTER_NAME }}
+          location: ${{ secrets.GCP_K8S_CLUSTER_LOCATION }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Delete all Deployments
+        run: kubectl delete deployment --all
+
+      - name: Delete all Services
+        run: kubectl delete svc --all
+
+      - name: Delete all Ingresses
+        run: kubectl delete ingress --all
