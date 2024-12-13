@@ -48,6 +48,11 @@ jobs:
           location: ${{ secrets.GCP_K8S_CLUSTER_LOCATION }}
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
+      - name: Apply RBAC configuration
+        run: |
+          kubectl apply -f cicd/k8s/role.yaml
+          kubectl apply -f cicd/k8s/rolebinding.yaml
+
       - name: Deploy to GKE
         run: |
           kubectl apply -f cicd/k8s/backend-deployment.yml
