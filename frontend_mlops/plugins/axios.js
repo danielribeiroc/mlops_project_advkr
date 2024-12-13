@@ -14,6 +14,5 @@ export default defineNuxtPlugin((nuxtApp) => {
     }
   );
 
-  // Make the Axios instance available globally
   nuxtApp.provide('axios', axiosInstance);
 });
