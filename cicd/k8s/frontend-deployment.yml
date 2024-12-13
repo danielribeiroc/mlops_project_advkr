@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: ${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}/frontend-image:latest # TODO replace with repo address
+        image: REPLACE_ME_REGISTRY/frontend-image:latest # TODO replace with repo address
         ports:
         - containerPort: 3000
 

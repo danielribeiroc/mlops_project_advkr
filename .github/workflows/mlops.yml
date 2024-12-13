@@ -53,6 +53,12 @@ jobs:
           kubectl apply -f cicd/k8s/role.yaml
           kubectl apply -f cicd/k8s/rolebinding.yaml
 
+      - name: Substitute variables for registry
+        run: |
+          sed -i "s|REPLACE_ME_REGISTRY|${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}|g" cicd/k8s/backend-deployment.yml
+          sed -i "s|REPLACE_ME_REGISTRY|${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}|g" cicd/k8s/frontend-deployment.yml
+
+
       - name: Deploy to GKE
         run: |
           kubectl apply -f cicd/k8s/backend-deployment.yml

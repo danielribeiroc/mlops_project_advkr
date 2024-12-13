@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: ${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}/backend-image:latest
+        image: REPLACE_ME_REGISTRY/backend-image:latest
         ports:
         - containerPort: 8080
         env:
