@@ -20,4 +20,6 @@ spec:
         env:
         - name: PYTHONUNBUFFERED
           value: "1"
+        imagePullSecrets:
+          - name: my-regcred
 

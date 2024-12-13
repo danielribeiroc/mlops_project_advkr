@@ -48,6 +48,16 @@ jobs:
           location: ${{ secrets.GCP_K8S_CLUSTER_LOCATION }}
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
+      - name: Create registry secret
+        run: |
+          echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > keyfile.json
+          kubectl create secret docker-registry my-regcred \
+            --docker-server=${{ secrets.GCP_CONTAINER_REGISTRY_AUTH }} \
+            --docker-username=_json_key \
+            --docker-password="$(cat keyfile.json)" \
+            --docker-email=any@example.com \
+            --dry-run=client -o yaml | kubectl apply -f -
+
       - name: Apply RBAC configuration
         run: |
           kubectl apply -f cicd/k8s/role.yaml
@@ -57,7 +67,6 @@ jobs:
         run: |
           sed -i "s|REPLACE_ME_REGISTRY|${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}|g" cicd/k8s/backend-deployment.yml
           sed -i "s|REPLACE_ME_REGISTRY|${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}|g" cicd/k8s/frontend-deployment.yml
-
 
       - name: Deploy to GKE
         run: |
