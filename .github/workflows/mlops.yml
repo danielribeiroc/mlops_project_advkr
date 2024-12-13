@@ -27,19 +27,19 @@ jobs:
 
       - name: Configure Docker for GCP
         run: |
-          gcloud auth configure-docker ${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}
+          gcloud auth configure-docker ${{ secrets.GCP_CONTAINER_REGISTRY_AUTH }}
 
       - name: Build and push backend image
         if: always()
         run: |
-          docker build -t ${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/backend:latest ./backend
-          docker push ${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/backend:latest
+          docker build -t ${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}/backend:latest ./backend
+          docker push ${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}/backend:latest
 
       - name: Build and push frontend image
         if: always()
         run: |
-          docker build -t ${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/frontend:latest ./frontend_mlops
-          docker push ${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/frontend:latest
+          docker build -t ${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}/frontend:latest ./frontend_mlops
+          docker push ${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}/frontend:latest
 
       - name: Get GKE credentials
         uses: google-github-actions/get-gke-credentials@v2
