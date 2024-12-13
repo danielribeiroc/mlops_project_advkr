@@ -4,12 +4,10 @@ from services.rag_functions import init_retriever, load_files_to_dict, rag_reque
 import requests
 
 def process_message(message: Message):
-    if not message.timestamp:
-        message.timestamp = datetime.utcnow()
-    
-    if "hello" in message.text.lower():
-        return {"sender": "bot", "text": "Hello! How can I assist you today?", "timestamp": datetime.utcnow()}
-    return {"sender": "bot", "text": "Hello! How can I assist you today?", "timestamp": datetime.utcnow()}
+    print(message.prompt)
+    if "hello" in message.prompt.lower():
+        return {"sender": "bot", "generated_text": "Hello! How can I assist you today?", "timestamp": datetime.utcnow()}
+    return {"sender": "bot", "generated_text": "Hello! How can I assist you today?", "timestamp": datetime.utcnow()}
 
     #return rag_call(message, pipeline_rag)
 

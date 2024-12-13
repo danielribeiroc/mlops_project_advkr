@@ -2,15 +2,15 @@ from pydantic import BaseModel
 from datetime import datetime
 
 class Message(BaseModel):
-    sender: str
-    text: str
-    timestamp: datetime = None
+    prompt: str
+    max_length: int
+    temperature: float
     
     class Config:
         schema_extra = {
             "example": {
-                "sender": "user",
-                "text": "Hello, how are you?",
-                "timestamp": "2024-11-07T12:00:00"
+                "prompt": "Who is this person?",
+                "max_length": "100",
+                "temperature": "0.8"
             }
         }

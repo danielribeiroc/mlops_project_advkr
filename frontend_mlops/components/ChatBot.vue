@@ -92,24 +92,26 @@ async function sendMessage() {
     userMessage.value = "";
     try {
       // Envoyer un message au llm avec le sys RAG
-      const ragResponse = await $fetch(`${useRuntimeConfig().public.apiBase}/messages-rag`, {
+      const ragResponse = await $fetch(`${useRuntimeConfig().public.ragENV}/generate`, {
         method: "POST",
         body: {
-          sender: "user",
-          text: newMessage.text,
+          prompt: newMessage.text,
+          "max_length": 100,
+          "temperature": 0.9
         },
       });
-      messages.value.rag.push({ text: ragResponse.text, sender: "ai" });
+      messages.value.rag.push({ text: ragResponse.generated_text, sender: "ai" });
 
       // Envoyer un message au llm LORA
-      const loraResponse = await $fetch(`${useRuntimeConfig().public.apiBase}/messages-lora`, {
+      const loraResponse = await $fetch(`${useRuntimeConfig().public.loraENV}/generate`, {
         method: "POST",
         body: {
-          sender: "user",
-          text: newMessage.text,
+          "prompt": newMessage.text,
+          "max_length": 100,
+          "temperature": 0.9
         },
       });
-      messages.value.lora.push({ text: loraResponse.text, sender: "ai" });
+      messages.value.lora.push({ text: loraResponse.generated_text, sender: "ai" });
     } catch (error) {
       console.error("Error sending message:", error);
       messages.value.rag.push({ text: "Error processing message (RAG bot).", sender: "ai" });

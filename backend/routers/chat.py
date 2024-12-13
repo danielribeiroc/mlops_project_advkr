@@ -5,7 +5,7 @@ from services.message_service import process_message
 
 router = APIRouter()
 
-@router.post("/messages-rag")
+@router.post("/generate")
 async def send_message(message: Message):
     #from main import pipeline_rag
 

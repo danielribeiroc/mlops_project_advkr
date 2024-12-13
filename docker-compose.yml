@@ -23,17 +23,6 @@ services:
     depends_on:
       - backend-service
 
-  bentoml-service:
-    build:
-      context: ./lora  # Replace with the correct path
-    container_name: bentoml-service
-    ports:
-      - "3002:3002"  # Port where Bentoml will be accessible
-    networks:
-      - mlops-network
-    environment:
-      - PYTHONUNBUFFERED=1
-
 networks:
   mlops-network:
     driver: bridge
