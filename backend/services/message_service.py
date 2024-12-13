@@ -3,23 +3,15 @@ from datetime import datetime
 from services.rag_functions import init_retriever, load_files_to_dict, rag_request
 import requests
 
-def process_message(message: Message, pipeline_rag):
+def process_message(message: Message):
     if not message.timestamp:
         message.timestamp = datetime.utcnow()
     
     if "hello" in message.text.lower():
         return {"sender": "bot", "text": "Hello! How can I assist you today?", "timestamp": datetime.utcnow()}
-    
-    return rag_call(message, pipeline_rag)
-    '''if message.sender.lower() == "rag":
-        return rag_call(message, pipeline_rag)
+    return {"sender": "bot", "text": "Hello! How can I assist you today?", "timestamp": datetime.utcnow()}
 
-    if "hello" in message.text.lower():
-        return {"sender": "bot", "text": "Hello! How can I assist you today?", "timestamp": datetime.utcnow()}
-    elif "bye" in message.text.lower():
-        return {"sender": "bot", "text": "Goodbye! Have a great day!", "timestamp": datetime.utcnow()}
-    else:
-        return {"sender": "bot", "text": "I'm here to help! Ask me anything.", "timestamp": datetime.utcnow()}'''
+    #return rag_call(message, pipeline_rag)
 
 def rag_call(message: Message, pipeline_rag):
     print("Loading files...")
