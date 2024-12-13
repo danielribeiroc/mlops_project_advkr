@@ -17,6 +17,6 @@ spec:
         image: REPLACE_ME_REGISTRY/frontend-image:latest # TODO replace with repo address
         ports:
         - containerPort: 3000
-        imagePullSecrets:
+      imagePullSecrets:
         - name: my-regcred
 

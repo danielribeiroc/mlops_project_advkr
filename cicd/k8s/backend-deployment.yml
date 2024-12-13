@@ -12,6 +12,8 @@ spec:
       labels:
         app: backend
     spec:
+      imagePullSecrets:
+        - name: my-regcred
       containers:
       - name: backend
         image: REPLACE_ME_REGISTRY/backend-image:latest
@@ -20,6 +22,3 @@ spec:
         env:
         - name: PYTHONUNBUFFERED
           value: "1"
-        imagePullSecrets:
-          - name: my-regcred
-
