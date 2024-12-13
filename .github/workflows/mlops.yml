@@ -92,7 +92,7 @@ on:
     #      password: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
     #  - name: Import the BentoML model
     #    if: github.ref == 'refs/heads/main'
-    #    run: bentoml models import model/celestial_bodies_classifier_model.bentomodel
+    #    run: bentoml test import model/celestial_bodies_classifier_model.bentomodel
     #  - name: Build the BentoML model artifact
     #    if: github.ref == 'refs/heads/main'
     #    run: bentoml build src

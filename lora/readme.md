@@ -51,7 +51,7 @@ Use `service.py` to:
 ### 4. Serve the Service
 #### Locally
 ```bash
-bentoml serve service.py:svc --port 3002 --debug
+bentoml serve rag_service.py:svc --port 3002 --debug
 ```
 
 #### Build & Run with Docker
