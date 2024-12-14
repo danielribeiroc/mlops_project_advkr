@@ -16,7 +16,7 @@ spec:
         - name: my-regcred
       containers:
       - name: backend
-        image: REPLACE_ME_REGISTRY/backend-image:latest
+        image: REPLACE_ME_REGISTRY/backend:latest
         ports:
         - containerPort: 8080
         env:

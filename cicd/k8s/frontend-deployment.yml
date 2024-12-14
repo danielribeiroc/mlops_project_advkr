@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: REPLACE_ME_REGISTRY/frontend-image:latest # TODO replace with repo address
+        image: REPLACE_ME_REGISTRY/frontend:latest
         ports:
         - containerPort: 3000
       imagePullSecrets:
