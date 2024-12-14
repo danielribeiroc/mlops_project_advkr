@@ -28,7 +28,7 @@ app.add_middleware(
 )
 
 # init pipe --> one time at start
-pipeline_rag = rag_functions.init_pipe(MODEL_ID)
+#pipeline_rag = rag_functions.init_pipe(MODEL_ID)
 
 app.include_router(chat.router, prefix="/api/v1")
 #app.include_router(train_model.router, prefix="/api/v1")

@@ -1,0 +1,30 @@
+service: "rag_service:svc"
+
+description: "A Bento containing a retrieval-augmented generation (RAG) system, including a text generation model and retriever."
+
+# Include relevant directories and files
+include:
+  - "models/"
+  - "data/"
+  - "faiss_index/"
+  - "*.py"
+
+exclude:
+  - "deprecated/"
+  - "offload_dir/"
+  - "llama-3.2-1b/"
+
+python:
+  packages:
+    - transformers
+    - torch
+    - langchain_community
+    - faiss-cpu
+    - bentoml
+    - langchain
+    - langchain_text_splitters
+    - huggingface_hub
+    - sentence-transformers
+
+docker:
+  base_image: "bentoml/model-server:latest"
