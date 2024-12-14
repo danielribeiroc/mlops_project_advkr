@@ -1,0 +1,78 @@
+name: Build, Push and Deploy to GKE
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths-ignore:
+      - 'dvc'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Set up Cloud SDK
+        run: |
+          curl https://sdk.cloud.google.com | bash > /dev/null
+          source "$HOME/google-cloud-sdk/path.bash.inc"
+          gcloud --version
+        shell: bash
+
+      - name: Configure Docker for GCP
+        run: |
+          gcloud auth configure-docker ${{ secrets.GCP_CONTAINER_REGISTRY_AUTH }}
+
+      - name: Build and push backend image
+        if: always()
+        run: |
+          docker build -t ${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}/backend:latest ./backend
+          docker push ${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}/backend:latest
+
+      - name: Build and push frontend image
+        if: always()
+        run: |
+          docker build -t ${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}/frontend:latest ./frontend_mlops
+          docker push ${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}/frontend:latest
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ secrets.GCP_K8S_CLUSTER_NAME }}
+          location: ${{ secrets.GCP_K8S_CLUSTER_LOCATION }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Create registry secret
+        run: |
+          echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > keyfile.json
+          kubectl create secret docker-registry my-regcred \
+            --docker-server=${{ secrets.GCP_CONTAINER_REGISTRY_AUTH }} \
+            --docker-username=_json_key \
+            --docker-password="$(cat keyfile.json)" \
+            --docker-email=any@example.com \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Apply RBAC configuration
+        run: |
+          kubectl apply -f cicd/k8s/role.yaml
+          kubectl apply -f cicd/k8s/rolebinding.yaml
+
+      - name: Substitute variables for registry
+        run: |
+          sed -i "s|REPLACE_ME_REGISTRY|${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}|g" cicd/k8s/backend-deployment.yml
+          sed -i "s|REPLACE_ME_REGISTRY|${{ secrets.GCP_CONTAINER_REGISTRY_HOST }}|g" cicd/k8s/frontend-deployment.yml
+
+      - name: Deploy to GKE
+        run: |
+          kubectl apply -f cicd/k8s/backend-deployment.yml
+          kubectl apply -f cicd/k8s/backend-service.yml
+          kubectl apply -f cicd/k8s/frontend-deployment.yml
+          kubectl apply -f cicd/k8s/frontend-service.yml
+          # If you have an Ingress:
+          kubectl apply -f cicd/k8s/frontend-ingress.yml

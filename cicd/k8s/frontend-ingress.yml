@@ -2,20 +2,16 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress-frontend
+  annotations:
+    kubernetes.io/ingress.class: "gce"
 spec:
-  ingressClassName: nginx
   rules:
-    - host: ${HOST} # TODO replace with HOST address or find a way to do it properly
-      http:
+    - http:
         paths:
-          - path: /
+          - path: "/"
             pathType: Prefix
             backend:
               service:
-                name: service-frontend
+                name: frontend
                 port:
-                  name: http
-  tls:
-    - hosts:
-        - ${HOST} # TODO replace with HOST address or find a way to do it properly
-
+                  number: 80
