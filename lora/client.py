@@ -1,19 +1,14 @@
 """
-Generating Text Using the Deployed LLaMA Model API
-==================================================
+Fine-Tuning a LLaMA Language Model with LoRA (Low-Rank Adaptation)
 
-This script sends a request to the deployed LLaMA language model API to generate text based
-on a provided prompt. It constructs the necessary JSON payload with parameters for text
-generation, handles the API response, and manages potential request errors.
 
-Requirements:
-- Install the necessary package: requests
+This script fine-tunes a pre-trained LLaMA language model using Low-Rank Adaptation (LoRA) on a custom dataset of local text files. 
+The fine-tuned model and tokenizer are then saved for future use.
 
-Module : MLOps
 Authors: alex.mozerski, daniel.ribeirocabral, victor.rominger, killian.ruffieux, ruben.terceiro
-Date: 05.12.2024
-===================================================
+Date: 16.12.2024
 """
+
 
 import requests
 
