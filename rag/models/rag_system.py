@@ -1,26 +1,38 @@
-from generator import Generator
-from retriever import Retriever
+from models.generator import Generator
+from models.retriever import Retriever
+
 
 class RAGSystem:
     def __init__(self, retriever: Retriever, generator: Generator):
+        """
+        Initialize the RAGSystem with a retriever and generator.
+
+        Args:
+            retriever (Retriever): An instance of the Retriever class for fetching context.
+            generator (Generator): An instance of the Generator class for text generation.
+        """
         self.retriever = retriever
         self.generator = generator
 
-    def format_prompt(self, contexts, question):
+    def format_prompt(self, contexts: str, question: str) -> str:
         """
         Formats the combined prompt for the generator.
 
         Args:
-        - contexts: List of context strings retrieved from the retriever.
-        - question: The question to ask the generator.
+        - contexts (str): List of context strings retrieved from the retriever.
+        - question (str): The question to ask the generator.
 
         Returns:
         - A formatted prompt string.
         """
+
         # Limit the number of contexts to fit within token limit
 
         # Remove unnecessary start and end tokens
-        cleaned_context = contexts.replace("<|startoftext|>", "").replace("<|endoftext|>", ""). replace("[INST]", "").replace("[/INST]", "")
+        cleaned_context = (contexts.replace("<|startoftext|>", "")
+                           .replace("<|endoftext|>", "")
+                           .replace("[INST]", "")
+                           .replace("[/INST]", ""))
 
         # Create the final prompt
         prompt = f"""
@@ -35,7 +47,7 @@ class RAGSystem:
 
         return prompt
 
-    def ask(self, query, retriever_top_k=3, generator_args=None):
+    def ask(self, query: str, retriever_top_k=3) -> dict:
         """
         Handles the retrieval-augmented generation process.
 
@@ -47,22 +59,17 @@ class RAGSystem:
         Returns:
         - The generated response.
         """
+
         # Step 1: Retrieve relevant documents
         context = self.retriever.search(query)
 
-        print("Step 1 : \n", context)
+        #print("Step 1 : \n", context)
         # print(context)
         if not context:
-            return "No relevant information found in the knowledge base."
+            return {"generated_text": "No relevant information found in the knowledge base."}
 
         formatted_prompt = self.format_prompt(context, query)
         print("\n\n Step 2 : \n", formatted_prompt)
-
-        # Combine the retrieved context with the query
-        # context_text = "\n".join(context)
-
-        # Step 2: Generate a response using the generator
-        # generator_args = generator_args or {}
 
         gen_response = self.generator.generate(formatted_prompt)
 
@@ -70,6 +77,6 @@ class RAGSystem:
 
         stop_keyword = "###ENDANSWER###"
 
-        final_output = gen_response.split(start_keyword)[-1].split(stop_keyword)[0].strip()
+        final_output = {"generated_text": gen_response.split(start_keyword)[-1].split(stop_keyword)[0].strip()}
 
         return final_output
