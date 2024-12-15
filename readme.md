@@ -1,7 +1,6 @@
 # Documentation to Run the Project with Docker Compose
 
-Lien Frontend deployer : http://146.148.12.28:3000/
-Lien Backend deployer : http://146.148.12.28:3000/
+URL deployed frontend : [http://146.148.12.28:3000/](http://146.148.12.28:3000/)
 
 This guide will help you launch both the frontend and backend using Docker Compose.
 
