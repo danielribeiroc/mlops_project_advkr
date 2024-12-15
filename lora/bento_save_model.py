@@ -17,6 +17,10 @@ Date: 05.12.2024
 import bentoml
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
+import os
+
+BENTOML_STORAGE_PATH = "/actions-runner/bentoml"
+os.environ["BENTOML_HOME"] = BENTOML_STORAGE_PATH
 
 # Define the directory where the fine-tuned model is saved and determine the device
 MODEL_DIR = "fine_tuned_lora_llama"

@@ -34,6 +34,4 @@ python:
     - requests                       # HTTP library for making API requests.
 
 docker:
-  base_image: "bentoml/model-server:latest"  # Specifies the base Docker image to use for deployment.
-                                            # Uses the latest BentoML model server image, which is optimized 
-                                            # for serving BentoML services.
+  python_version: "3.12"
