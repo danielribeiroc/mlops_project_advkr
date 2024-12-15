@@ -6,7 +6,16 @@ import dotenv
 
 dotenv.load_dotenv()
 
-MODEL_ID = os.getenv("GENERATOR_MODEL")  # distilbert/distilbert-base-uncased" #
+MODEL_ID = os.getenv("GENERATOR_MODEL")
+HF_TOKEN = os.getenv("HUGGING_FACE_TOKEN")
+
+print(
+    f"""
+Generator
+    Model ID: {MODEL_ID}
+    HF Token: {HF_TOKEN}"""
+)
+
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
@@ -26,11 +35,15 @@ class Generator:
             model = model_ref.load_model()
             tokenizer = AutoTokenizer.from_pretrained(model_ref.path_of("tokenizer"))
             print("Model loaded successfully.")
+
         except:
             print("Model not found. Creating a new one")
-            tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
-            model = AutoModelForCausalLM.from_pretrained(MODEL_ID).to(DEVICE)
+            tokenizer = AutoTokenizer.from_pretrained(MODEL_ID,token=HF_TOKEN)
+            print("Tokenizer loaded successfully.")
+            model = AutoModelForCausalLM.from_pretrained(MODEL_ID, token=HF_TOKEN) #.to(DEVICE)
+            print()
             model.eval()
+            print("Model evaluated successfully.")
             model_ref = bentoml.transformers.save_model(
                 "llama_generation",
                 model,
@@ -40,6 +53,7 @@ class Generator:
                     "tokenizer_name": MODEL_ID,
                 },
             )
+            print("Model saved successfully.")
             tokenizer_path = model_ref.path_of("tokenizer")
             tokenizer.save_pretrained(tokenizer_path)
             print("Model Created successfully.")

@@ -9,12 +9,7 @@ include:
   - "config/*"
   - "faiss_index/"
   - "*.py"
-  - ".env"
-
-exclude:
-  - "deprecated/"
-  - "offload_dir/"
-  - "llama-3.2-1b/"
+  - "/.env"
 
 python:
   packages:

@@ -9,9 +9,26 @@ from google.cloud import storage
 
 dotenv.load_dotenv()
 
+"""
+EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+GC_BUCKET_NAME = "2024-mlops-projet-advkr"
+GC_ACCESS_CREDENTIALS = "./config/tsm-machledata-guidemlops-2024-51e8ac4d6976.json
+"""
+
+HF_TOKEN = os.getenv("HUGGING_FACE_TOKEN")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
 GC_ACCESS_CREDENTIALS = os.getenv("GC_ACCESS_CREDENTIALS")
 GC_BUCKET_NAME = os.getenv("GC_BUCKET_NAME")
+
+print(
+    f"""
+Retriever
+    EMBEDDING_MODEL: {EMBEDDING_MODEL}"
+    GC_ACCESS_CREDENTIALS: {GC_ACCESS_CREDENTIALS}"
+    GC_BUCKET_NAME: {GC_BUCKET_NAME}"
+    HF : {HF_TOKEN}"""
+)
+
 VECTORSTORE_PREFIX = "faiss_index"
 DATA_PREFIX = "data"
 
@@ -48,37 +65,37 @@ class Retriever:
         Returns:
             FAISS: The loaded vectorstore object.
         """
+        if self.cloud:
+            # Check if the vectorstore exists in the cloud
+            print(f"Checking if vectorstore exists in GCS: {VECTORSTORE_PREFIX}")
 
-        # Check if the vectorstore exists in the cloud
-        print(f"Checking if vectorstore exists in GCS: {VECTORSTORE_PREFIX}")
+            if any(self.bucket.list_blobs(prefix=VECTORSTORE_PREFIX, max_results=1)):
+                print(f"Folder '{VECTORSTORE_PREFIX}' exists in GCS. Downloading its content...")
 
-        if any(self.bucket.list_blobs(prefix=VECTORSTORE_PREFIX, max_results=1)):
-            print(f"Folder '{VECTORSTORE_PREFIX}' exists in GCS. Downloading its content...")
+                # Move one level up to the parent directory
+                parent_dir = os.path.dirname(os.getcwd())
 
-            # Move one level up to the parent directory
-            parent_dir = os.path.dirname(os.getcwd())
+                # Create a folder named after the prefix one level above
+                vectorstore_dir = os.path.join(parent_dir, VECTORSTORE_PREFIX)
 
-            # Create a folder named after the prefix one level above
-            vectorstore_dir = os.path.join(parent_dir, VECTORSTORE_PREFIX)
+                print(f"Download directory: {vectorstore_dir}")
+                os.makedirs(vectorstore_dir, exist_ok=True)
 
-            print(f"Download directory: {vectorstore_dir}")
-            os.makedirs(vectorstore_dir, exist_ok=True)
+                # List all blobs in the folder and download each
+                blobs = self.bucket.list_blobs(prefix=VECTORSTORE_PREFIX)
+                for blob in blobs:
+                    if blob.name.endswith('/'):  # Skip folder-like entries
+                        continue
+                    print(f"Downloading file: {blob.name}")
+                    filename = os.path.basename(blob.name)
 
-            # List all blobs in the folder and download each
-            blobs = self.bucket.list_blobs(prefix=VECTORSTORE_PREFIX)
-            for blob in blobs:
-                if blob.name.endswith('/'):  # Skip folder-like entries
-                    continue
-                print(f"Downloading file: {blob.name}")
-                filename = os.path.basename(blob.name)
+                    # Construct the full local path for the downloaded file.
+                    vectorfile_local_path = os.path.join(vectorstore_dir, filename)
 
-                # Construct the full local path for the downloaded file.
-                vectorfile_local_path = os.path.join(vectorstore_dir, filename)
+                    print(f"Downloading file: {blob.name} to {vectorfile_local_path}")
+                    blob.download_to_filename(vectorfile_local_path)
 
-                print(f"Downloading file: {blob.name} to {vectorfile_local_path}")
-                blob.download_to_filename(vectorfile_local_path)
-
-            print("Successfully downloaded vectorstore from GCS.")
+                print("Successfully downloaded vectorstore from GCS.")
 
         if os.path.exists("../faiss_index"):
             print("Loading vectorstore from local storage...")
@@ -136,10 +153,10 @@ class Retriever:
                 print(f"Failed to load documents from GCS. Error: {e}")
 
         else:
-            for filename in os.listdir("../" + DATA_PREFIX):
+            for filename in os.listdir("./" + DATA_PREFIX):
                 print(filename)
                 if filename.endswith(".txt"):
-                    filepath = os.path.join("../" + DATA_PREFIX, filename)
+                    filepath = os.path.join("./" + DATA_PREFIX, filename)
                     with open(filepath, "r", encoding="utf-8") as f:
                         documents[os.path.splitext(filename)[0]] = f.read()
             print("Successfully loaded documents from local storage.")
@@ -158,7 +175,10 @@ class Retriever:
 
         # Save the vector store
         self.vectorstore.save_local("../" + VECTORSTORE_PREFIX)
-        self._save_vectorstore_gcs(VECTORSTORE_PREFIX)
+
+        if self.cloud:
+            self._save_vectorstore_gcs(VECTORSTORE_PREFIX)
+
         return self.vectorstore
 
     def add_document(self, filepath: str) -> None:
@@ -171,7 +191,7 @@ class Retriever:
 
         self.add_documents([filepath])
 
-    def add_documents(self, filepaths: list[str])-> None:
+    def add_documents(self, filepaths: list[str]) -> None:
         """
         Add multiple documents to the vectorstore at once.
 
@@ -215,8 +235,8 @@ class Retriever:
                 self.vectorstore.add_texts(chunks, metadatas=[{"source": doc_id}] * len(chunks))
 
         self.vectorstore.save_local("../" + VECTORSTORE_PREFIX)
-
-        self._save_vectorstore_gcs(VECTORSTORE_PREFIX)
+        if self.cloud:
+            self._save_vectorstore_gcs(VECTORSTORE_PREFIX)
 
         print("Vectorstore updated after adding multiple documents.")
 
