@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       ragENV: process.env.RAG_ENV || "http://localhost:8000/api/v1",
-      loraENV: process.env.LORA_ENV || "http://localhost:3002",
+      loraENV: process.env.LORA_ENV || "http://localhost:8000/api/v1",
     },
   },
   compatibilityDate: '2024-11-06',

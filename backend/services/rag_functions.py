@@ -1,16 +1,6 @@
 import os
 import boto3
-import logging
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import FAISS
-from langchain.chains import RetrievalQA
-from langchain.llms import HuggingFacePipeline
-from transformers import pipeline
-from langchain_community.document_loaders import TextLoader
 from dotenv import load_dotenv
-from huggingface_hub import HfApi
-from transformers import pipeline
-import torch
 from transformers import pipeline, AutoModelForCausalLM, AutoTokenizer
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS

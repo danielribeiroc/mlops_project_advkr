@@ -34,3 +34,9 @@ docker-compose down
 ```
 
 This will stop and remove the containers.
+
+# Important point
+
+The two Docker containers in the Docker Compose setup function locally but currently return the same response for all queries. This limitation arises from challenges encountered during the deployment of BentoML in the cloud. As a result, the routes are functional only with the backend running locally and provide static responses.
+
+However, the application has been tested successfully with BentoML running locally, where the responses are displayed correctly.

@@ -92,13 +92,14 @@ async function sendMessage() {
     userMessage.value = "";
     try {
       // Envoyer un message au LLM avec le sys RAG
-      const ragResponse = await $fetch(`${useRuntimeConfig().public.ragENV}/ask`, {
+      const ragResponse = await $fetch(`${useRuntimeConfig().public.ragENV}`, {
         method: "POST",
         body: {
-          "query": newMessage.text,
+          "prompt": newMessage.text,
+          "max_length": 50,
+          "temperature": 0.7
         },
       });
-      console.log(ragResponse);
       messages.value.rag.push({ text: ragResponse.generated_text, sender: "ai" });
     } catch (error) {
       console.error("Error sending message to RAG bot:", error);
@@ -107,7 +108,7 @@ async function sendMessage() {
 
     try {
       // Envoyer un message au LLM LORA
-      const loraResponse = await $fetch(`${useRuntimeConfig().public.loraENV}/messages-lora`, {
+      const loraResponse = await $fetch(`${useRuntimeConfig().public.loraENV}`, {
         method: "POST",
         body: {
           "prompt": "<|startoftext|>[INST] " + newMessage.text + " [/INST]",
