@@ -91,30 +91,33 @@ async function sendMessage() {
 
     userMessage.value = "";
     try {
-      // Envoyer un message au llm avec le sys RAG
-      const ragResponse = await $fetch(`${useRuntimeConfig().public.ragENV}/generate`, {
+      // Envoyer un message au LLM avec le sys RAG
+      const ragResponse = await $fetch(`${useRuntimeConfig().public.ragENV}/ask`, {
         method: "POST",
         body: {
-          prompt: newMessage.text,
-          "max_length": 100,
-          "temperature": 0.9
+          "query": newMessage.text,
         },
       });
+      console.log(ragResponse);
       messages.value.rag.push({ text: ragResponse.generated_text, sender: "ai" });
+    } catch (error) {
+      console.error("Error sending message to RAG bot:", error);
+      messages.value.rag.push({ text: "Error processing message (RAG bot).", sender: "ai" });
+    }
 
-      // Envoyer un message au llm LORA
-      const loraResponse = await $fetch(`${useRuntimeConfig().public.loraENV}/generate`, {
+    try {
+      // Envoyer un message au LLM LORA
+      const loraResponse = await $fetch(`${useRuntimeConfig().public.loraENV}/messages-lora`, {
         method: "POST",
         body: {
-          "prompt": newMessage.text,
-          "max_length": 100,
-          "temperature": 0.9
+          "prompt": "<|startoftext|>[INST] " + newMessage.text + " [/INST]",
+          "max_length": 50,
+          "temperature": 0.7
         },
       });
       messages.value.lora.push({ text: loraResponse.generated_text, sender: "ai" });
     } catch (error) {
-      console.error("Error sending message:", error);
-      messages.value.rag.push({ text: "Error processing message (RAG bot).", sender: "ai" });
+      console.error("Error sending message to LORA bot:", error);
       messages.value.lora.push({ text: "Error processing message (LORA bot).", sender: "ai" });
     }
   }

@@ -2,6 +2,14 @@ from models.message import Message
 from datetime import datetime
 from services.rag_functions import init_retriever, load_files_to_dict, rag_request
 import requests
+import bentoml
+from bentoml.io import JSON
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+
+# Load model and tokenizer
+MODEL_DIR = "fine_tuned_lora_llama"
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 def process_message(message: Message):
     print(message.prompt)
@@ -26,26 +34,51 @@ def rag_call(message: Message, pipeline_rag):
     return {"sender": "rag", "text": answer, "timestamp": datetime.utcnow()}
 
 def lora_call(message: Message):
+    """
+    Handles text generation using the LoRA fine-tuned model on GPU.
+    """
+    print("Loading model and tokenizer...")
 
-    url = "http://0.0.0.0:3002/generate" # TODO
-    headers = {"Content-Type": "application/json"}
+    # Load tokenizer and model
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
+    model = AutoModelForCausalLM.from_pretrained(MODEL_DIR).to(DEVICE)  # Move to GPU
+    model.eval()  # Set the model to evaluation mode (important for generation)
 
-    data = {
-        "prompt": f"<|startoftext|>[INST] {message.text} [/INST]",
-        "max_length": 100, 
-        "temperature": 0.9, 
-        "top_k": 50,     
-        "top_p": 0.9,        
-    }
+    print("Model and tokenizer loaded successfully.")
 
-    try:
-        response = requests.post(url, json=data, headers=headers)
-        response.raise_for_status()
-        generated_text = response.json().get("generated_text")
-        return {"sender": "lora", "text": generated_text, "timestamp": datetime.utcnow()}
-    except requests.exceptions.RequestException as e:
-        print(f"Request failed: {e}")
-    
-    except Exception as e:
-        print(f"Error: {e}")
+    # Extract parameters from the Message object
+    prompt = message.prompt
+    max_length = message.max_length if message.max_length else 50  # Set default if None
+    temperature = message.temperature if message.temperature else 0.4  # Set default if None
+
+    # Generate text
+    generated_text = generate_text(prompt, tokenizer, model, max_length, temperature)
+
+    print("Generated text:", generated_text)
+    return {"sender": "bot", "generated_text": generated_text, "timestamp": datetime.utcnow()}
+
+
+# Updated generate_text function
+def generate_text(prompt, tokenizer, model, max_length=50, temperature=0.9, top_k=50, top_p=0.9):
+    """
+    Generates text from a given prompt using the fine-tuned model.
+    """
+    with torch.no_grad():  # No gradient calculation for inference
+        # Tokenize input text and move tensors to GPU
+        inputs = tokenizer(prompt, return_tensors="pt", padding=True, truncation=True, max_length=512)
+        inputs = {key: value.to(DEVICE) for key, value in inputs.items()}  # Move to GPU
+
+        # Generate text
+        outputs = model.generate(
+            input_ids=inputs["input_ids"],
+            attention_mask=inputs["attention_mask"],
+            max_length=max_length,
+            temperature=temperature,
+            num_return_sequences=1,
+            pad_token_id=tokenizer.eos_token_id,
+            top_k=top_k,
+            top_p=top_p,
+        )
+    # Decode the generated text
+    return tokenizer.decode(outputs[0], skip_special_tokens=True)
 

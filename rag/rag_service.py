@@ -5,7 +5,17 @@ with bentoml.importing():
     from models.generator import Generator
     from models.rag_system import RAGSystem
 
-@bentoml.service(name="ragservice")
+@bentoml.service(name="ragservice", http={
+    "cors": {
+        "enabled": True,
+        "access_control_allow_origins": ["http://localhost:3000/", "*"],
+        "access_control_allow_methods": ["GET", "OPTIONS", "POST", "HEAD", "PUT"],
+        "access_control_allow_credentials": True,
+        "access_control_allow_headers": ["*"],
+        "access_control_max_age": 1200,
+        "access_control_expose_headers": ["Content-Length"]
+    }
+})
 class RAGService:
     def __init__(self):
         self.retriever = Retriever()
