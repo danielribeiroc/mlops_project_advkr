@@ -1,16 +1,6 @@
 import os
 import boto3
-import logging
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import FAISS
-from langchain.chains import RetrievalQA
-from langchain.llms import HuggingFacePipeline
-from transformers import pipeline
-from langchain_community.document_loaders import TextLoader
 from dotenv import load_dotenv
-from huggingface_hub import HfApi
-from transformers import pipeline
-import torch
 from transformers import pipeline, AutoModelForCausalLM, AutoTokenizer
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
@@ -38,7 +28,7 @@ def read_file_content(source, path):
         with open(path, "r", encoding="utf-8") as file:
             return file.read()
     elif source == "s3":
-        bucket, key = path.split("/", 1)  # Format: "bucket/key"
+        bucket, key = path.split("/", 1)
         s3 = boto3.client("s3")
         response = s3.get_object(Bucket=bucket, Key=key)
         return response["Body"].read().decode("utf-8")
@@ -60,14 +50,12 @@ def load_files_to_dict(base_path, source="local", prefix=""):
     files_dict = {}
 
     if source == "local":
-        # Process local files
         for filename in os.listdir(base_path):
             file_path = os.path.join(base_path, filename)
             if os.path.isfile(file_path) and filename.endswith(".txt"):
                 files_dict[filename] = read_file_content(source, file_path)
 
     elif source == "s3":
-        # Process S3 files
         s3 = boto3.client("s3")
         response = s3.list_objects_v2(Bucket=base_path, Prefix=prefix)
         for obj in response.get("Contents", []):
@@ -79,14 +67,12 @@ def load_files_to_dict(base_path, source="local", prefix=""):
 
     return files_dict
 
-def init_pipe(model_id):
-    model = AutoModelForCausalLM.from_pretrained(model_id)
-
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
+def init_pipe(model_id, model_cache_dir="./models"):
+    model = AutoModelForCausalLM.from_pretrained(model_id, cache_dir=model_cache_dir)
+    tokenizer = AutoTokenizer.from_pretrained(model_id, cache_dir=model_cache_dir)
+    
     model.config.eos_token_id = tokenizer.eos_token_id
     model.config.pad_token_id = tokenizer.pad_token_id
-
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
 
     pipe = pipeline(
         "text-generation",
@@ -100,26 +86,25 @@ def init_pipe(model_id):
 
 def init_retriever(documents):
 
-    texts = [content for content in documents.values()]  # Extract text content
-
-    # Step 2: Initialize embedding model
+    texts = [content for content in documents.values()]
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
-    # Step 3: Create FAISS vector store
     vector_store = FAISS.from_texts(texts, embeddings)
 
-    # Step 4: Set up MMR-based retriever
     retriever = vector_store.as_retriever(
         search_type="mmr",
-        search_kwargs={"k": 2, "lambda_mult": 0.5}  # Adjust `k` and `lambda_mult` as needed
+        search_kwargs={"k": 2, "lambda_mult": 0.5}
     )
 
     return retriever
 
 def rag_request(query, retriever, pipe):
+    #device = "cuda" if torch.cuda.is_available() else "cpu"
+    ##pipe.model.to(device)
+    ##pipe.tokenizer.to(device)
+
     docs = retriever.invoke(query)
-    context = " ".join([doc.page_content for doc in docs])  # Combine document content
-    # Step 7: Generate answer
+    context = " ".join([doc.page_content for doc in docs])
     prompt = f"""
     Context:
     {context}

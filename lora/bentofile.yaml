@@ -1,21 +1,17 @@
 # ==============================================================================
-# BentoML Configuration File
-# ==============================================================================
+# BentoML Configuration
 #
-# This configuration defines the BentoML service for generating text using a
-# fine-tuned LLaMA language model. It specifies the service details, included
-# files, required Python packages, and Docker settings for deployment.
+# Defines a BentoML service for text generation using a fine-tuned LLaMA model.
 #
 # Requirements:
-# - Install BentoML: `pip install bentoml`
+# - pip install bentoml
 #
-# Module : MLOps
-# Authors: alex.mozerski, daniel.ribeirocabral, victor.rominger, 
+# Authors: alex.mozerski, daniel.ribeirocabral, victor.rominger,
 #          killian.ruffieux, ruben.terceiro
-# Date: 05.12.2024
+# Date: 16.12.2024
 # ==============================================================================
-service: "service:svc"  # Specifies the BentoML service to deploy. 
-                       # "svc" should match the service name defined in your Python code.
+
+service: "service:svc"    # Name of the BentoML service to deploy.
 
 description: "Service for generating text using a fine-tuned LLaMA model."
 
@@ -34,6 +30,4 @@ python:
     - requests                       # HTTP library for making API requests.
 
 docker:
-  base_image: "bentoml/model-server:latest"  # Specifies the base Docker image to use for deployment.
-                                            # Uses the latest BentoML model server image, which is optimized 
-                                            # for serving BentoML services.
+  python_version: "3.12"

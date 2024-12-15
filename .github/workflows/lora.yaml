@@ -1,0 +1,46 @@
+name: MLOps
+
+on:
+  push:
+    branches: ['main']
+    paths: ['lora/**']
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  test-dvc:
+    permissions: write-all
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install dependencies
+        run: pip install --requirement lora/requirements.txt
+      - name: Run file
+        run: python lora/fine-tuning-llama.py
+      - name: Run BentoML
+        run: python lora/bento_save_model.py
+      - name: Build the BentoML model artifact
+        run: |
+          cd lora
+          mv ../fine_tuned_lora_llama/ ./
+          bentoml build
+      - name: Containerize and publish the BentoML model artifact Docker image
+        run: |
+          # Upgrade to the latest version of BentoML
+          pip install --upgrade bentoml
+          
+          # Containerize the BentoML model artifact
+          bentoml containerize llama_generation:latest \
+            --image-tag llama_generation:latest
+          # List images on Docker
+          docker images
+          # Push the container to the Container Registry
+          docker tag llama_generation:latest europe-west6-docker.pkg.dev/mlops-project-advkr/mlops-project-advkr-registry/llama_generation:latest
+          docker push europe-west6-docker.pkg.dev/mlops-project-advkr/mlops-project-advkr-registry/llama_generation

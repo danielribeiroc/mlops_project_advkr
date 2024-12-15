@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bentoml-service-deployment
+  labels:
+    app: bentoml-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bentoml-service
+  template:
+    metadata:
+      labels:
+        app: bentoml-service
+    spec:
+      containers:
+      - name: bentoml-service
+        image: your-registry/your-project/bentoml-service:latest # TODO add correct docker image of the bentoml 
+        ports:
+        - containerPort: 3002
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"

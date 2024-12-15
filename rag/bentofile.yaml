@@ -1,0 +1,32 @@
+service: "rag_service.py:RAGService"
+
+description: "A Bento containing a retrieval-augmented generation (RAG) system, including a text generation model and retriever."
+
+# Include relevant directories and files
+include:
+  - "models/"
+  - "data/"
+  - "config/*"
+  - "faiss_index/"
+  - "*.py"
+  - "/.env"
+
+python:
+  packages:
+    - transformers
+    - torch
+    - google
+    - google-cloud
+    - google-auth
+    - google-cloud-storage
+    - python-dotenv
+    - langchain_community
+    - faiss-cpu
+    - bentoml
+    - langchain
+    - langchain_text_splitters
+    - huggingface_hub
+    - sentence-transformers
+
+docker:
+  python_version: "3.11"

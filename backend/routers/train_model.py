@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, File, UploadFile
 from typing import List
-from services.dvc_service import DVCService
 
+'''
 router = APIRouter()
 dvc_service = DVCService(dataset_dir="./datasets")  # Initialize the service
 
@@ -20,3 +20,5 @@ async def train_model(files: List[UploadFile] = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
     
     return {"message": "Files received, tracked with DVC, and pushed to remote storage."}
+
+'''

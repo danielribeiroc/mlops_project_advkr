@@ -1,17 +1,12 @@
 """
-Fine-tuning a LLaMA Language Model with LoRA (Low-Rank Adaptation)
-==================================================================
+Fine-Tuning a LLaMA Language Model with LoRA (Low-Rank Adaptation)
 
-This script fine-tunes a pre-trained LLaMA language model using LoRA (Low-Rank Adaptation)
-on a custom dataset of local text files. The fine-tuned model and tokenizer are then saved for later use.
 
-Requirements:
-- Install the necessary packages: transformers, peft, datasets, torch, huggingface_hub, yaml, bentoml, tqdm
+This script fine-tunes a pre-trained LLaMA language model using Low-Rank Adaptation (LoRA) on a custom dataset of local text files. 
+The fine-tuned model and tokenizer are then saved for future use.
 
-Module : MLOps
 Authors: alex.mozerski, daniel.ribeirocabral, victor.rominger, killian.ruffieux, ruben.terceiro
-Date: 05.12.2024
-===================================================================
+Date: 16.12.2024
 """
 
 # Import necessary libraries
@@ -38,32 +33,24 @@ from peft import (
 
 def configure_lora(model):
     """
-    Configure Low-Rank Adaptation (LoRA) for the given model.
+    Configure and apply Low-Rank Adaptation (LoRA) to the given model.
 
-    This function sets up the LoRA configuration with specified hyperparameters,
-    applies it to the model, freezes the base model parameters, and sets
-    the LoRA parameters to require gradients.
+    LoRA allows efficient fine-tuning of large language models by adapting a low-rank 
+    decomposition on certain transformer modules without fully retraining all parameters.
 
     Parameters:
-        model (transformers.PreTrainedModel): The pre-trained model to configure with LoRA.
+        model (transformers.PreTrainedModel): A pre-trained model to be adapted.
 
     Returns:
-        transformers.PreTrainedModel: The model configured with LoRA.
+        transformers.PreTrainedModel: The model with LoRA layers integrated.
     """
-    # User input for LoRA hyperparameters
-    # Uncomment the lines below to enable dynamic configuration
-    # r = int(input("Enter rank (r): "))
-    # lora_alpha = int(input("Enter LoRA alpha: "))
-    # lora_dropout = float(input("Enter LoRA dropout (0-1): "))
-    # target_modules = input("Enter target modules (comma-separated, e.g., 'q_proj,v_proj'): ").split(",")
-
     # LoRA hyperparameters
-    r = 64  # Rank of the decomposition
-    lora_alpha = 64  # Scaling factor
-    lora_dropout = 0.1  # Dropout rate
-    target_modules = ["q_proj", "v_proj"]  # Modules to apply LoRA to
+    r = 64  # Rank for the low-rank decomposition
+    lora_alpha = 64  # Scaling factor for LoRA
+    lora_dropout = 0.1  # Dropout applied to LoRA layers
+    target_modules = ["q_proj", "v_proj"]  # Transformer modules to which LoRA is applied
 
-    # Create LoRA configuration
+    # Create a LoRA configuration object
     lora_config = LoraConfig(
         r=r,
         lora_alpha=lora_alpha,
@@ -91,17 +78,20 @@ def configure_lora(model):
 
 def load_and_tokenize_local_files(tokenizer, folder_path):
     """
-    Load and tokenize text data from local files.
+    Load text files from a local directory and tokenize them for training.
 
-    This function reads all text files in the specified folder, tokenizes the text,
-    and prepares it for training.
+    Steps:
+    1. Reads all `.txt` files from the given folder.
+    2. Splits their content into lines.
+    3. Converts lines into a Hugging Face Dataset object.
+    4. Tokenizes the dataset using the provided tokenizer, preparing inputs and labels.
 
     Parameters:
-        tokenizer (transformers.PreTrainedTokenizer): The tokenizer to use.
-        folder_path (str): Path to the folder containing text files.
+        tokenizer (transformers.PreTrainedTokenizer): The tokenizer for text encoding.
+        folder_path (str): The directory containing `.txt` files.
 
     Returns:
-        datasets.Dataset: The tokenized dataset.
+        datasets.Dataset: A tokenized dataset ready for model training.
     """
     print("Loading and tokenizing local text files...")
 
@@ -145,26 +135,32 @@ def load_and_tokenize_local_files(tokenizer, folder_path):
 
 def create_dataloader(tokenized_dataset, batch_size=4):
     """
-    Create a DataLoader from the tokenized dataset.
+    Create a DataLoader for the tokenized dataset.
+
+    This DataLoader shuffles the data and prepares batches for training.
 
     Parameters:
-        tokenized_dataset (datasets.Dataset): The tokenized dataset.
-        batch_size (int): The batch size for training.
+        tokenized_dataset (datasets.Dataset): The tokenized dataset for training.
+        batch_size (int): Batch size for training.
 
     Returns:
-        torch.utils.data.DataLoader: The DataLoader for training.
+        torch.utils.data.DataLoader: A DataLoader for the training dataset.
     """
     return DataLoader(tokenized_dataset, batch_size=batch_size, shuffle=True)
 
 def setup_training(model):
     """
-    Set up the optimizer and learning rate scheduler.
+    Set up the optimizer and learning rate scheduler for training.
+
+    Uses AdamW as the optimizer and a linear learning rate scheduler.
 
     Parameters:
-        model (transformers.PreTrainedModel): The model to train.
+        model (transformers.PreTrainedModel): The model to be trained.
 
     Returns:
-        tuple: The optimizer and scheduler.
+        tuple: (optimizer, scheduler)
+            optimizer (torch.optim.Optimizer): The configured optimizer.
+            scheduler (transformers.Scheduler): The learning rate scheduler.
     """
     # Filter parameters that require gradients
     optimizer = AdamW(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-4)
@@ -178,14 +174,20 @@ def setup_training(model):
 
 def train_model(model, data_loader, optimizer, scheduler, epochs=3):
     """
-    Train the model.
+    Train the model for a specified number of epochs.
+
+    For each epoch, the model will:
+    - Iterate over batches from the DataLoader
+    - Compute the loss
+    - Backpropagate and update the LoRA parameters
+    - Adjust the learning rate using the scheduler
 
     Parameters:
         model (transformers.PreTrainedModel): The model to train.
-        data_loader (torch.utils.data.DataLoader): The DataLoader for training data.
-        optimizer (torch.optim.Optimizer): The optimizer.
+        data_loader (torch.utils.data.DataLoader): DataLoader providing training batches.
+        optimizer (torch.optim.Optimizer): The optimizer for parameter updates.
         scheduler (transformers.Scheduler): The learning rate scheduler.
-        epochs (int): Number of training epochs.
+        epochs (int): Number of full training passes over the dataset.
     """
     print(f"Starting training for {epochs} epochs...")
     model.train()
@@ -216,44 +218,40 @@ def train_model(model, data_loader, optimizer, scheduler, epochs=3):
 
 def save_model(model, tokenizer, model_dir="fine_tuned_lora_llama"):
     """
-    Save the fine-tuned model and tokenizer.
+    Save the fine-tuned model and tokenizer to a specified directory.
+
+    This function merges the LoRA layers into the base model weights, updates the model configuration,
+    and saves both the model and tokenizer for future inference or further fine-tuning.
 
     Parameters:
-        model (transformers.PreTrainedModel): The trained model.
-        tokenizer (transformers.PreTrainedTokenizer): The tokenizer.
-        model_dir (str): Directory to save the model and tokenizer.
+        model (transformers.PreTrainedModel): The trained LoRA-adapted model.
+        tokenizer (transformers.PreTrainedTokenizer): The tokenizer used during training.
+        model_dir (str): Directory where the model and tokenizer will be saved.
     """
     print(f"Saving model to {model_dir}...")
     os.makedirs(model_dir, exist_ok=True)
 
-    # Merge LoRA weights into the base model
+    # Merge LoRA parameters back into the base model
     model = model.merge_and_unload()
 
-    # Resize the model's embeddings to match the tokenizer
-    #model.resize_token_embeddings(len(tokenizer)) 
-
-    # Remove PEFT configuration from the model's config
-    #if hasattr(model.config, "peft_config"):
-    #    del model.config.peft_config
-
-    # Ensure the vocab_size is correct
+    # Update the model configuration to ensure vocab size consistency
     model.config.vocab_size = len(tokenizer)
 
-    # Optional: Verify the vocab_size
+    # Optional: Check consistency of embeddings and vocab size
     print(f"Model config vocab_size: {model.config.vocab_size}")
     print(f"Tokenizer vocab size: {len(tokenizer)}")
     print(f"Model embeddings size: {model.get_input_embeddings().weight.shape}")
-    
+
     # Save the model
     model.save_pretrained(model_dir)
 
-    # Handle potential torch.dtype in tokenizer init kwargs
+    # Ensure any torch.dtype in tokenizer init kwargs is converted to string for serialization
     if hasattr(tokenizer, "init_kwargs"):
         for key, value in tokenizer.init_kwargs.items():
             if isinstance(value, torch.dtype):
                 tokenizer.init_kwargs[key] = str(value)
 
-    # Ensure padding token is set
+    # If tokenizer doesn't have a pad token, use eos_token as pad_token
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
@@ -263,8 +261,6 @@ def save_model(model, tokenizer, model_dir="fine_tuned_lora_llama"):
 
 # Main execution starts here
 if __name__ == "__main__":
-    # Change to the working directory @TODO Delete
-    # os.chdir('/home/mozerski/TM-2024/')  # Update with your working directory
 
     # Load Hugging Face token from YAML file and log in
     with open("hf_token.yaml", "r") as file:

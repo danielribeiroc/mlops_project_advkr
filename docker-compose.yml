@@ -1,12 +1,12 @@
 version: '3.8'
 
 services:
-  backend:
+  backend-service:
     build:
       context: ./backend
     container_name: backend
     ports:
-      - "8080:8080"
+      - "8000:8000"
     networks:
       - mlops-network
     environment:
@@ -21,7 +21,7 @@ services:
     networks:
       - mlops-network
     depends_on:
-      - backend
+      - backend-service
 
 networks:
   mlops-network:

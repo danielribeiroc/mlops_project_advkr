@@ -12,12 +12,13 @@ spec:
       labels:
         app: backend
     spec:
+      imagePullSecrets:
+        - name: my-regcred
       containers:
       - name: backend
-        image: backend-image:latest # TODO replace with repo address
+        image: REPLACE_ME_REGISTRY/backend:latest
         ports:
         - containerPort: 8080
         env:
         - name: PYTHONUNBUFFERED
           value: "1"
-

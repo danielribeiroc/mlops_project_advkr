@@ -1,18 +1,19 @@
 """
-Deploying a Fine-tuned LLaMA Language Model with BentoML
-========================================================
+====================================================================
+This script serves a fine-tuned LLaMA model as a text generation service using BentoML.
 
-This script deploys a fine-tuned LLaMA language model using BentoML to create an API
-for text generation. The pre-trained model and tokenizer are loaded from a specified
-directory, and an API endpoint is provided to generate text based on input prompts.
+In this version, we've simplified the interface by removing additional sampling parameters 
+like temperature, top_k, and top_p. This makes the service easier to integrate into a pipeline, 
+relying on default model generation settings while still allowing for a customizable max_length.
 
-Requirements:
-- Install the necessary packages: transformers, bentoml, torch
+Steps:
+1. Loads a previously fine-tuned LLaMA model and tokenizer.
+2. Defines a single text generation endpoint using BentoML.
+3. Supports specifying a max_length for the generated text, but otherwise uses default generation parameters.
 
-Module : MLOps
 Authors: alex.mozerski, daniel.ribeirocabral, victor.rominger, killian.ruffieux, ruben.terceiro
-Date: 05.12.2024
-=========================================================
+Date: 16.12.2024
+====================================================================
 """
 
 import bentoml
